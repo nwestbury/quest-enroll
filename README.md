@@ -9,4 +9,4 @@ Create a file called `credentials.json` and fill it in like so:
 }
 ```
 
-Then run `node index.js`.
+Then run `yarn install` and `node index.js`
