@@ -5,17 +5,16 @@ const credentials = JSON.parse(fs.readFileSync("credentials.json"));
 
 async function login(page) {
     console.log('starting login');
-    await page.goto('https://www.beartracks.ualberta.ca/', {waitUntil: 'networkidle0'});
-    console.log('reached login page');
-    await (await page.$('#signin > a')).click();
+    await page.goto(
+        'https://www.beartracks.ualberta.ca/uahebprd/signon.html',
+        {waitUntil: 'networkidle0'});
+    /*await (await page.$('#signin > a img')).click();
     console.log('clicked sign in');
-    await page.screenshot({path: 'screenshot.png', fullPage: true});
+    await page.screenshot({path: 'screenshot.png', fullPage: true});*/
     await page.waitForSelector('#loginform input#username');
     console.log('reached login page');
-    await page.click('#loginform input#username');
-    await page.type(credentials.username);
-    await page.click('#loginform input#user_pass');
-    await page.type(credentials.password);
+    await page.type('#loginform input#username', credentials.username);
+    await page.type('#loginform input#user_pass', credentials.password);
     console.log('typed credentials in form');
     await page.click('#loginform input[type=submit]');
     await page.waitForSelector('frameset[title="Main Content"]');
