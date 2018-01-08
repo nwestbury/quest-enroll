@@ -5,6 +5,6 @@
   "author": "Nathan Liebrecht",
   "license": "MIT",
   "dependencies": {
-    "puppeteer": "^0.13.0"
+    "puppeteer": "^1.0.0-rc"
   }
 }
