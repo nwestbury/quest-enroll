@@ -19,15 +19,17 @@ async function login(page) {
     console.log('typed credentials in form');
     await page.click('#loginform input[type=submit]');
     await page.waitForSelector('frameset[title="Main Content"]');
+    console.log('logged in');
 }
 
 (async() => {
+    console.log('launching browser');
     const browser = await puppeteer.launch();
+    console.log('new page');
     const page = await browser.newPage();
 
     try {
         await login(page);
-        console.log('logged in');
 
         await page.waitForNavigation({waitUntil: 'networkidle0'});
 
@@ -41,6 +43,7 @@ async function login(page) {
         browser.close();
     } catch(e) {
         console.log('error! saved screenshot');
+        console.log(e);
         await page.screenshot({path: 'screenshot.png', fullPage: true});
     }
 
