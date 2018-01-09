@@ -32,7 +32,11 @@ async function login(page) {
 
         await page.waitForNavigation({waitUntil: 'networkidle0'});
 
-        const navFrame = page.mainFrame().childFrames()
+        const childFrames = page.mainFrame().childFrames();
+        console.log('\nchild frames: ');
+        childFrames.forEach(f => console.log(f.name()));
+
+        const navFrame = childFrames
             .find(frame => frame.name() === 'NAV'); // TODO replace with frameattach event
         await (await navFrame.$('a[name=ZSS_WATCH_LIST_GBL_1]')).click();
         await page.waitForNavigation({waitUntil: 'networkidle'});
