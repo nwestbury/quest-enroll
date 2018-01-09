@@ -30,7 +30,9 @@ async function login(page) {
     try {
         await login(page);
 
-        await page.waitForNavigation({waitUntil: 'networkidle0'});
+        await new Promise(resolve=> setTimeout(_=>resolve(),6000));
+
+        //await page.waitForNavigation({waitUntil: 'networkidle2'});
 
         const childFrames = page.mainFrame().childFrames();
         console.log('\nchild frames: ');
