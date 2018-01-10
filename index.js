@@ -2,6 +2,10 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 const credentials = JSON.parse(fs.readFileSync("credentials.json"));
+const watchlist = "https://www.beartracks.ualberta.ca/psc/uahebprd/EMPLOYEE/HRMS/c/ZSS_STUDENT_CENTER.ZSS_WATCH_LIST.GBL";
+
+const icon_open = "https://www.beartracks.ualberta.ca/cs/uahebprd/cache2/PS_CS_STATUS_OPEN_ICN_1.gif";
+const icon_closed = "https://www.beartracks.ualberta.ca/cs/uahebprd/cache2/PS_CS_COURSE_ENROLLED_ICN_1.gif"
 
 async function login(page) {
     console.log('starting login');
@@ -30,18 +34,41 @@ async function login(page) {
     try {
         await login(page);
 
-        await new Promise(resolve=> setTimeout(_=>resolve(),6000));
+        while(true) {
+            await page.goto(watchlist);
+            const table_rows = await page.$$('[id^="trZSSV_WATCH_LIST$0_row"]');
 
-        //await page.waitForNavigation({waitUntil: 'networkidle2'});
+            const open_classes = new Set();
+            const closed_classes = new Set();
 
-        const childFrames = page.mainFrame().childFrames();
-        console.log('\nchild frames: ');
-        childFrames.forEach(f => console.log(f.name()));
+            console.log("found ", table_rows.length, "rows");
 
-        const navFrame = childFrames
-            .find(frame => frame.name() === 'NAV'); // TODO replace with frameattach event
-        await (await navFrame.$('a[name=ZSS_WATCH_LIST_GBL_1]')).click();
-        await page.waitForNavigation({waitUntil: 'networkidle'});
+            for(const row of table_rows) {
+                const open = await row.$('img[src="/cs/uahebprd/cache2/PS_CS_STATUS_OPEN_ICN_1.gif"]');
+                if(open !== null) {
+                    const class_span = await row.$('[id^="win0divDERIVED_REGFRM1_SSR_CLASSNAME_"] span');
+                    const class_text = await page.evaluate(span => span.innerHTML, class_span);
+                    const section_span = await row.$('[id^="win0divDERIVED_REGFRM1_DESCR40"] span');
+                    const section_text = await page.evaluate(span => span.innerHTML, section_span);
+                    open_classes.add(class_text+" "+section_text);
+                }
+            }
+
+            for(const row of table_rows) {
+                const open = await row.$('img[src="/cs/uahebprd/cache2/PS_CS_COURSE_ENROLLED_ICN_1.gif"]');
+                if(open !== null) {
+                    const class_span = await row.$('[id^="win0divDERIVED_REGFRM1_SSR_CLASSNAME_"] span');
+                    const class_text = await page.evaluate(span => span.innerHTML, class_span);
+                    const section_span = await row.$('[id^="win0divDERIVED_REGFRM1_DESCR40"] span');
+                    const section_text = await page.evaluate(span => span.innerHTML, section_span);
+                    closed_classes.add(class_text+" "+section_text);
+                }
+            }
+
+            console.log("open classes: ", [...open_classes].join(", "));
+            console.log("closed classes: ", [...closed_classes].join(", "));
+            console.log("");
+        }
 
         await page.screenshot({path: 'screenshot.png', fullPage: true});
 
