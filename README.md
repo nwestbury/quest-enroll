@@ -1,6 +1,6 @@
 # ualberta-enroll
 
-Sign up for [mailgun](mailgun.com) and create a file
+Sign up for [mailgun](https://mailgun.com) and create a file
 called `credentials.json` with this content:
 
 ```
