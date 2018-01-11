@@ -9,8 +9,10 @@ const credentials = JSON.parse(fs.readFileSync("credentials.json"));
 
 const mailgun = mailgunjs({apiKey: credentials.mailgun_api_key, domain: credentials.mailgun_domain});
 const watchlist = "https://www.beartracks.ualberta.ca/psc/uahebprd/EMPLOYEE/HRMS/c/ZSS_STUDENT_CENTER.ZSS_WATCH_LIST.GBL";
-const enroll = "https://www.beartracks.ualberta.ca/psp/uahebprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_CART.GBL";
+//https://www.beartracks.ualberta.ca/psc/uahebprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_CART.GBL?pslnkid=ZSS_HC_SSR_SSENRL_CART_GBL&FolderPath=PORTAL_ROOT_OBJECT.ZSS_ACADEMICS.ZSS_AC_ENROLL.ZSS_HC_SSR_SSENRL_CART_GBL&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder&PortalActualURL=https%3a%2f%2fwww.beartracks.ualberta.ca%2fpsc%2fuahebprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSR_SSENRL_CART.GBL%3fpslnkid%3dZSS_HC_SSR_SSENRL_CART_GBL&PortalContentURL=https%3a%2f%2fwww.beartracks.ualberta.ca%2fpsc%2fuahebprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSR_SSENRL_CART.GBL%3fpslnkid%3dZSS_HC_SSR_SSENRL_CART_GBL&PortalContentProvider=HRMS&PortalCRefLabel=Add&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fwww.beartracks.ualberta.ca%2fpsp%2fuahebprd%2f&PortalURI=https%3a%2f%2fwww.beartracks.ualberta.ca%2fpsc%2fuahebprd%2f&PortalHostNode=HRMS&NoCrumbs=yes&PortalKeyStruct=yes
+const enroll_url = "https://www.beartracks.ualberta.ca/psc/uahebprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_CART.GBL";
 const rate = 15*1000;
+
 
 async function send_email_notification(msg) {
     const data = {
@@ -61,6 +63,48 @@ async function check_watchlist(page) {
     return [open_classes, closed_classes]
 }
 
+async function check_enroll(page) {
+    await page.goto(enroll_url);
+
+    const table_rows = await page.$$('[id^="trSSR_REGFORM_VW$0_row"]');
+    await page.screenshot({path: 'screenshot.png', fullPage: true});
+
+    const open_classes = [];
+    const closed_classes = [];
+
+    for(const row of table_rows) {
+        const select = await row.$('input[class="PSCHECKBOX"]');
+        const selectable = select !== null;
+        if (selectable) {
+            const open = await row.$('img[src="/cs/uahebprd/cache2/PS_CS_STATUS_OPEN_ICN_1.gif"]');
+            if (open !== null) {
+                const class_span = await row.$('[id^="win0divZSS_DERIVED_COURSE_TITLE"] span');
+                const class_text = await page.evaluate(span => span.innerHTML, class_span);
+                const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a');
+                const section_text = await page.evaluate(span => span.innerHTML, section_span);
+                open_classes.push(class_text + " " + section_text);
+            }
+        }
+    }
+
+    for(const row of table_rows) {
+        const select = await row.$('input[class="PSCHECKBOX"]');
+        const selectable = select !== null;
+        if (selectable) {
+            const full = await row.$('img[src="/cs/uahebprd/cache2/PS_CS_COURSE_ENROLLED_ICN_1.gif"]');
+            if (full !== null) {
+                const class_span = await row.$('[id^="win0divZSS_DERIVED_COURSE_TITLE"] span');
+                const class_text = await page.evaluate(span => span.innerHTML, class_span);
+                const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a');
+                const section_text = await page.evaluate(span => span.innerHTML, section_span);
+                closed_classes.push(class_text + " " + section_text);
+            }
+        }
+    }
+
+    return [open_classes, closed_classes];
+}
+
 (async() => {
     console.log('launching browser');
     const browser = await puppeteer.launch();
@@ -73,17 +117,16 @@ async function check_watchlist(page) {
 
         while(true) {
 
-            await check_watchlist(page);
+            const [open_classes, closed_classes] = await check_enroll(page);
             
             const availability = `
                 <p>
                     open classes: ${open_classes.join(", ")}<br/>
                     closed classes: ${closed_classes.join(", ")}
                 </p>
-                ${enroll}`;
+                ${enroll_url}`;
 
             if(prev_availability !== availability) {
-                console.log("found ", table_rows.length, "rows");
                 console.log(availability);
 
                 prev_availability = availability;
