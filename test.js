@@ -11,7 +11,7 @@ const credentials = JSON.parse(fs.readFileSync("credentials.json"));
 describe('login()', function () {
     let browser, page;
     beforeEach(async function () {
-        browser = await puppeteer.launch();
+        browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
         page = await browser.newPage();
     });
     afterEach(async function () {
