@@ -9,6 +9,7 @@ const credentials = JSON.parse(fs.readFileSync("credentials.json"));
 
 const mailgun = mailgunjs({apiKey: credentials.mailgun_api_key, domain: credentials.mailgun_domain});
 const watchlist = "https://www.beartracks.ualberta.ca/psc/uahebprd/EMPLOYEE/HRMS/c/ZSS_STUDENT_CENTER.ZSS_WATCH_LIST.GBL";
+const enroll = "https://www.beartracks.ualberta.ca/psp/uahebprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_CART.GBL";
 const rate = 15*1000;
 
 async function send_email_notification(msg) {
@@ -16,7 +17,7 @@ async function send_email_notification(msg) {
         from: 'Watchlist Notifier <postmaster@'+credentials.mailgun_domain+'>',
         to: credentials.notify_email,
         subject: 'Bear Tracks Watchlist Notification',
-        text: msg
+        html: msg
     };
 
     try {
@@ -67,8 +68,12 @@ async function send_email_notification(msg) {
                 }
             }
 
-            const availability = "open classes: " + open_classes.join(", ") +
-                "\nclosed classes: " + closed_classes.join(", ");
+            const availability = `
+                <p>
+                    open classes: ${open_classes.join(", ")}<br/>
+                    closed classes: ${closed_classes.join(", ")}
+                </p>
+                ${enroll}`;
 
             if(prev_availability !== availability) {
                 console.log("found ", table_rows.length, "rows");
