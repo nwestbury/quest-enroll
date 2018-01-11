@@ -12,5 +12,15 @@
   },
   "scripts": {
     "test": "mocha"
-  }
+  },
+  "description": "Watchlist watcher",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nlieb/ualberta-enroll.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nlieb/ualberta-enroll/issues"
+  },
+  "homepage": "https://github.com/nlieb/ualberta-enroll#readme"
 }
