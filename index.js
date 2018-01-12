@@ -81,7 +81,15 @@ async function check_enroll(page) {
                 const class_text = await page.evaluate(span => span.innerHTML, class_span);
                 const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a, [id^="win0divP_CLASS_NAME"] span:not(.PSHYPERLINK)');
                 const section_text = await page.evaluate(span => span.innerHTML, section_span);
-                open_classes.push(class_text + " " + section_text);
+
+                const _class = {
+                    class_name: class_text,
+                    section_name: section_text,
+                    name: () => class_text + " " + section_text,
+                    select_box: select
+                };
+
+                open_classes.push(_class);
             }
         }
     }
@@ -96,7 +104,15 @@ async function check_enroll(page) {
                 const class_text = await page.evaluate(span => span.innerHTML, class_span);
                 const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a, [id^="win0divP_CLASS_NAME"] span:not(.PSHYPERLINK)');
                 const section_text = await page.evaluate(span => span.innerHTML, section_span);
-                closed_classes.push(class_text + " " + section_text);
+
+                const _class = {
+                    class_name: class_text,
+                    section_name: section_text,
+                    name: () => class_text + " " + section_text,
+                    select_box: select
+                };
+
+                closed_classes.push(_class);
             }
         }
     }
@@ -120,8 +136,8 @@ async function check_enroll(page) {
             
             const availability = `
                 <p>
-                    open classes: ${open_classes.join(", ")}<br/>
-                    closed classes: ${closed_classes.join(", ")}
+                    open classes: ${open_classes.map(c => c.name()).join(", ")}<br/>
+                    closed classes: ${closed_classes.map(c => c.name()).join(", ")}
                 </p>
                 ${enroll_url}`;
 
@@ -130,6 +146,25 @@ async function check_enroll(page) {
 
                 prev_availability = availability;
                 await send_email_notification(availability);
+
+                for(open_class of open_classes) {
+                    await open_class.select_box.click();
+                    await page.screenshot({path: 'selected.png', fullPage: true});
+
+                    console.log(`Enrolling in ${open_class.name()}`)
+                    const enroll_handle = await page.$('[id="DERIVED_REGFRM1_LINK_ADD_ENRL$291$"]');
+                    await enroll_handle.click();
+
+                    await page.screenshot({path: 'enrolling.png', fullPage: true});
+
+                    await new Promise(resolve => setTimeout(resolve, 6000));
+
+                    const finish_handle = await page.$('[id="DERIVED_REGFRM1_SSR_PB_SUBMIT"]');
+                    await finish_handle.click();
+
+                    await new Promise(resolve => setTimeout(resolve, 6000));
+                    await page.screenshot({path: 'done.png', fullPage: true});
+                }
             } else {
                 process.stdout.write('.');
             }
