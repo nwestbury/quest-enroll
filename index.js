@@ -67,7 +67,6 @@ async function check_enroll(page) {
     await page.goto(enroll_url);
 
     const table_rows = await page.$$('[id^="trSSR_REGFORM_VW$0_row"]');
-    await page.screenshot({path: 'screenshot.png', fullPage: true});
 
     const open_classes = [];
     const closed_classes = [];
@@ -80,7 +79,7 @@ async function check_enroll(page) {
             if (open !== null) {
                 const class_span = await row.$('[id^="win0divZSS_DERIVED_COURSE_TITLE"] span');
                 const class_text = await page.evaluate(span => span.innerHTML, class_span);
-                const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a');
+                const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a, [id^="win0divP_CLASS_NAME"] span:not(.PSHYPERLINK)');
                 const section_text = await page.evaluate(span => span.innerHTML, section_span);
                 open_classes.push(class_text + " " + section_text);
             }
@@ -95,7 +94,7 @@ async function check_enroll(page) {
             if (full !== null) {
                 const class_span = await row.$('[id^="win0divZSS_DERIVED_COURSE_TITLE"] span');
                 const class_text = await page.evaluate(span => span.innerHTML, class_span);
-                const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a');
+                const section_span = await row.$('[id^="win0divP_CLASS_NAME"] a, [id^="win0divP_CLASS_NAME"] span:not(.PSHYPERLINK)');
                 const section_text = await page.evaluate(span => span.innerHTML, section_span);
                 closed_classes.push(class_text + " " + section_text);
             }
