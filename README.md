@@ -1,4 +1,4 @@
-# ualberta-enroll
+# university-enroll
 [![Build Status](https://travis-ci.org/nlieb/ualberta-enroll.svg?branch=master)](https://travis-ci.org/nlieb/ualberta-enroll)
 
 Requirements:
