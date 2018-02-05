@@ -1,5 +1,5 @@
-# university-enroll
-[![Build Status](https://travis-ci.org/nlieb/ualberta-enroll.svg?branch=master)](https://travis-ci.org/nlieb/ualberta-enroll)
+# quest-enroll
+[![Build Status](https://api.travis-ci.org/nwestbury/quest-enroll.svg?branch=master)](https://travis-ci.org/nwestbury/quest-enroll)
 
 Requirements:
 * yarn
