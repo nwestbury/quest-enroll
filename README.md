@@ -1,7 +1,7 @@
 # ualberta-enroll
 [![Build Status](https://travis-ci.org/nlieb/ualberta-enroll.svg?branch=master)](https://travis-ci.org/nlieb/ualberta-enroll)
 
-Basically this software checks your "Add" list in your schedule builder (not watchlist) for open classes. If one or more green circles is found, indicating that the class is open, it attempts to enroll in that class. Behavior is undefined for enrollment failures.
+Basically this software checks your "Add" list in your schedule builder (not watchlist) for open classes. If one or more green circles is found, indicating that those classes are open, it attempts to enroll in those classes. Behavior is undefined for enrollment failures (ie after a failure it might retry enrollment many times, which is bad). Mailgun is used for email notification of enrollment attempts.
 
 ## Requirements
 - Latest LTS version of [nodejs](https://nodejs.org/en/) 
