@@ -1,6 +1,7 @@
 .idea/
 node_modules/
 credentials.json
+.idea/
 
 # Ignore all images (screenshots)
 *.png
