@@ -9,7 +9,6 @@ const credentials = JSON.parse(fs.readFileSync("credentials.json"));
 const config = JSON.parse(fs.readFileSync("config.json"))[credentials.university];
 
 const mailgun = mailgunjs({apiKey: credentials.mailgun_api_key, domain: credentials.mailgun_domain});
-const { watchlist_url, enroll_url } = config;
 const rate = 15*1000;
 
 
@@ -36,10 +35,18 @@ function clean_str(str) {
 }
 
 async function check_enroll(page) {
+    const {
+        enroll_url,
+        enroll_table_row_id,
+        enroll_checkbox,
+        enroll_open_img,
+        enroll_close_img,
+        enroll_course_title,
+        enroll_section_title
+    } = config;
+
     await page.goto(enroll_url);
 
-    const { enroll_table_row_id, enroll_checkbox, enroll_open_img, enroll_close_img,
-            enroll_course_title, enroll_section_title } = config;
     const table_rows = await page.$$(enroll_table_row_id);
 
     const open_classes = [];
@@ -81,12 +88,13 @@ async function check_enroll(page) {
     console.log('new page');
     const page = await browser.newPage();
 
+    const { enroll_url } = config;
+
     try {
         await login(page, config, credentials);
         let prev_availability = "";
 
         while(true) {
-
             const [open_classes, closed_classes] = await check_enroll(page);
 
             const availability = `
